@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PromptForge: AI Prompt Builder</title>
+    <style>
+        /* --- CSS (style.css) --- */
+        :root {
+            --bg-dark: #1a1a1a;
+            --bg-medium: #333333;
+            --text-light: #f0f0f0;
+            --text-gray: #aaaaaa;
+            --accent-color: #66b3ff; /* สีฟ้าอ่อนสำหรับเน้น */
+            --border-color: #555555;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--bg-medium);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+        }
+
+        header h1 {
+            margin: 0;
+            color: var(--accent-color);
+            font-size: 1.8rem;
+        }
+
+        nav {
+            margin-top: 0.5rem;
+        }
+
+        nav button {
+            background-color: var(--bg-medium);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            margin-left: 0.5rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        nav button:hover,
+        nav button.active {
+            background-color: var(--accent-color);
+            color: var(--bg-dark);
+        }
+
+        main {
+            padding: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        section {
+            background-color: var(--bg-medium);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        section.hidden {
+            display: none;
+        }
+
+        h2, h3 {
+            color: var(--accent-color);
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-gray);
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: var(--bg-dark);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+            margin-right: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        button:hover {
+            background-color: #4da6ff;
+        }
+
+        .template-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .template-buttons button {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+        }
+
+        .template-buttons button:hover {
+            background-color: var(--accent-color);
+            color: var(--bg-dark);
+        }
+
+        .output-area {
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        #saved-prompts-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        #saved-prompts-list li {
+            background-color: var(--bg-dark);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        #saved-prompts-list li p {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        #saved-prompts-list li button {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            margin-top: 0;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            nav {
+                width: 100%;
+                display: flex;
+                justify-content: space-around;
+                margin-top: 1rem;
+            }
+
+            nav button {
+                margin: 0 0.2rem;
+                padding: 0.5rem 0.8rem;
+                flex-grow: 1;
+            }
+
+            main {
+                padding: 1rem;
+            }
+
+            button {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 0.5rem;
+            }
+
+            .template-buttons button {
+                width: 100%;
+                margin-right: 0;
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            color: var(--text-gray);
+            border-top: 1px solid var(--border-color);
+            background-color: var(--bg-medium);
+            margin-top: 2rem;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>PromptForge</h1>
+        <nav>
+            <button id="nav-home">หน้าหลัก</button>
+            <button id="nav-builder">สร้าง Prompt</button>
+            <button id="nav-saved">Prompt ที่บันทึก</button>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home-section" class="active">
+            <h2>ยินดีต้อนรับสู่ PromptForge</h2>
+            <p>เครื่องมือสร้าง Prompt AI ที่ใช้งานง่ายสำหรับทุกความต้องการของคุณ</p>
+            <p>เลือก AI หรือเริ่มต้นสร้าง Prompt ใหม่ได้เลย!</p>
+        </section>
+
+        <section id="builder-section" class="hidden">
+            <h2>สร้าง Prompt ใหม่</h2>
+            <div class="ai-selection">
+                <label for="ai-type">เลือก AI:</label>
+                <select id="ai-type">
+                    <option value="chatgpt">ChatGPT</option>
+                    <option value="raphael">Raphael (Image)</option>
+                    <option value="suno">Suno (Music)</option>
+                    <option value="dreamina">Dreamina (Image/Video)</option>
+                    <option value="ideogram">Ideogram (Image)</option>
+                    <option value="gammas">Gammas (Text/Story)</option>
+                </select>
+            </div>
+
+            <div id="prompt-templates">
+                <h3>เลือกแม่แบบหรือสร้างเอง</h3>
+                <div class="template-buttons">
+                    </div>
+            </div>
+
+            <div id="prompt-input-fields">
+                </div>
+
+            <div class="output-area">
+                <h3>Prompt ที่สร้างได้</h3>
+                <textarea id="generated-prompt" rows="8" readonly></textarea>
+                <button id="copy-prompt-btn">คัดลอก Prompt</button>
+                <button id="save-prompt-btn">บันทึก Prompt</button>
+            </div>
+        </section>
+
+        <section id="saved-section" class="hidden">
+            <h2>Prompt ที่บันทึกไว้</h2>
+            <ul id="saved-prompts-list">
+                </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 PromptForge. สร้างสรรค์โดย [ชื่อของคุณ]</p>
+    </footer>
+
+    <script>
+        // --- JavaScript (prompt-data.js content) ---
+        const aiSettings = {
+            chatgpt: {
+                name: "ChatGPT",
+                description: "AI สำหรับการสนทนาและสร้างข้อความ",
+                inputFields: [
+                    { id: "main-idea", label: "แนวคิดหลัก", type: "textarea", placeholder: "เช่น เขียนบทความเกี่ยวกับเทคโนโลยี AI" },
+                    { id: "tone", label: "น้ำเสียง", type: "text", placeholder: "เช่น เป็นทางการ, ตลก, สร้างสรรค์" },
+                    { id: "length", label: "ความยาว", type: "text", placeholder: "เช่น สั้น, ปานกลาง, ละเอียด" },
+                    { id: "format", label: "รูปแบบ", type: "text", placeholder: "เช่น บทความ, สรุป, จดหมาย" }
+                ],
+                templates: {
+                    "article-outline": {
+                        name: "โครงสร้างบทความ",
+                        prompt: "สร้างโครงสร้างบทความเกี่ยวกับ '[main-idea]' ในน้ำเสียง '[tone]' ความยาว '[length]'",
+                        defaultValues: { tone: "เป็นทางการ", length: "ปานกลาง" }
+                    },
+                    "story-idea": {
+                        name: "แนวคิดเรื่องสั้น",
+                        prompt: "สร้างแนวคิดเรื่องสั้นแนว '[genre]' ที่มีตัวละครหลัก '[character-desc]' และเนื้อเรื่องเกี่ยวกับ '[main-idea]'. น้ำเสียง: '[tone]'.",
+                        inputFields: [
+                            { id: "main-idea", label: "แนวคิดหลัก (พล็อต)", type: "textarea", placeholder: "เช่น การผจญภัยในป่าลึกลับ" },
+                            { id: "genre", label: "แนวเรื่อง", type: "text", placeholder: "เช่น แฟนตาซี, ไซไฟ, โรแมนติก" },
+                            { id: "character-desc", label: "ลักษณะตัวละครหลัก", type: "text", placeholder: "เช่น อัศวินผู้กล้าหาญ, เด็กสาวผู้โดดเดี่ยว" },
+                            { id: "tone", label: "น้ำเสียง", type: "text", placeholder: "เช่น ลึกลับ, สนุกสนาน, เศร้า" }
+                        ]
+                    },
+                    "email-draft": {
+                        name: "ร่างอีเมล",
+                        prompt: "ร่างอีเมลถึง '[recipient]' เรื่อง '[main-idea]' โดยมีวัตถุประสงค์ว่า '[purpose]' น้ำเสียง '[tone]'",
+                        inputFields: [
+                            { id: "recipient", label: "ผู้รับ", type: "text", placeholder: "เช่น ผู้จัดการ, ลูกค้า, เพื่อน" },
+                            { id: "main-idea", label: "เรื่องหลักของอีเมล", type: "text", placeholder: "เช่น การประชุมครั้งต่อไป, รายงานความคืบหน้า" },
+                            { id: "purpose", label: "วัตถุประสงค์", type: "textarea", placeholder: "เช่น เพื่อขอข้อมูล, เพื่อแจ้งข่าวสาร" },
+                            { id: "tone", label: "น้ำเสียง", type: "text", placeholder: "เช่น เป็นทางการ, สุภาพ, ไม่เป็นทางการ" }
+                        ],
+                        defaultValues: { tone: "สุภาพ" }
+                    }
+                }
+            },
+            raphael: {
+                name: "Raphael (Image Generation)",
+                description: "AI สำหรับสร้างรูปภาพ",
+                inputFields: [
+                    { id: "subject", label: "หัวข้อ/ตัวแบบ", type: "text", placeholder: "เช่น มังกรบิน, ทะเลสาบยามค่ำคืน" },
+                    { id: "style", label: "สไตล์ภาพ", type: "text", placeholder: "เช่น สไตล์ภาพวาดสีน้ำมัน, ภาพถ่ายสมจริง, อนิเมะ" },
+                    { id: "lighting", label: "แสง/เงา", type: "text", placeholder: "เช่น แสงธรรมชาติ, แสงนีออน, แสงจันทร์" },
+                    { id: "details", label: "รายละเอียดเพิ่มเติม", type: "textarea", placeholder: "เช่น มุมมอง, อารมณ์ภาพ, องค์ประกอบ" }
+                ],
+                templates: {
+                    "image-realistic": {
+                        name: "ภาพสมจริง",
+                        prompt: "ภาพถ่ายสมจริงของ '[subject]' สไตล์ '[style]'. แสง: '[lighting]'. รายละเอียด: '[details]'",
+                        defaultValues: { style: "ภาพถ่ายสมจริง", lighting: "แสงธรรมชาติ" }
+                    },
+                    "image-fantasy": {
+                        name: "ภาพแฟนตาซี",
+                        prompt: "ภาพวาดแฟนตาซีของ '[subject]' ด้วยสไตล์ '[style]' ที่มีแสง '[lighting]' และรายละเอียด '[details]'",
+                        defaultValues: { style: "ภาพวาดสีน้ำมันแบบแฟนตาซี", lighting: "แสงลึกลับ" }
+                    },
+                    "character-concept": {
+                        name: "คอนเซ็ปต์ตัวละคร",
+                        prompt: "ภาพตัวละครสไตล์ '[style]': '[subject]'. รายละเอียด: '[details]'. แสง: '[lighting]'.",
+                        inputFields: [
+                            { id: "subject", label: "ลักษณะตัวละคร", type: "textarea", placeholder: "เช่น นักรบหญิงชุดเกราะทอง, พ่อมดชราพร้อมไม้เท้า" },
+                            { id: "style", label: "สไตล์ภาพ", type: "text", placeholder: "เช่น อนิเมะ, ภาพวาดดิจิทัล, ภาพประกอบเกม" },
+                            { id: "details", label: "ท่าทาง/องค์ประกอบเสริม", type: "text", placeholder: "เช่น กำลังร่ายเวท, ยืนสง่าพร้อมดาบ" },
+                            { id: "lighting", label: "แสง/เงา", type: "text", placeholder: "เช่น แสงมืดหม่น, แสงสว่างสดใส" }
+                        ]
+                    }
+                }
+            },
+            suno: {
+                name: "Suno (Music Generation)",
+                description: "AI สำหรับสร้างเพลง",
+                inputFields: [
+                    { id: "genre", label: "แนวเพลง", type: "text", placeholder: "เช่น ป๊อป, ร็อค, แจ๊ส, EDM" },
+                    { id: "mood", label: "อารมณ์เพลง", type: "text", placeholder: "เช่น สนุกสนาน, เศร้า, ผ่อนคลาย" },
+                    { id: "instruments", label: "เครื่องดนตรีหลัก", type: "text", placeholder: "เช่น เปียโน, กีตาร์, กลอง" },
+                    { id: "lyrics_idea", label: "แนวคิดเนื้อเพลง", type: "textarea", placeholder: "เช่น เกี่ยวกับความรักที่ไม่สมหวัง, การเดินทาง" }
+                ],
+                templates: {
+                    "song-pop": {
+                        name: "เพลงป๊อป",
+                        prompt: "สร้างเพลงป๊อปแนว '[genre]' อารมณ์ '[mood]' โดยมีเครื่องดนตรีหลักเป็น '[instruments]'. เนื้อเพลง: '[lyrics_idea]'",
+                        defaultValues: { genre: "Pop", mood: "Upbeat" }
+                    },
+                    "lofi-chill": {
+                        name: "เพลง Lo-Fi Chill",
+                        prompt: "สร้างเพลง Lo-Fi แนว '[genre]' อารมณ์ '[mood]' โดยมีเครื่องดนตรีหลักเป็น '[instruments]'",
+                        defaultValues: { genre: "Lo-Fi", mood: "Chill", instruments: "เปียโน, กลอง, เบส" }
+                    }
+                }
+            },
+            dreamina: {
+                name: "Dreamina (Image/Video Generation)",
+                description: "AI สำหรับสร้างรูปภาพหรือวิดีโอ",
+                inputFields: [
+                    { id: "scene", label: "ฉาก/สถานการณ์", type: "textarea", placeholder: "เช่น เมืองอนาคตยามค่ำคืน, ป่าโบราณ" },
+                    { id: "art_style", label: "สไตล์ศิลปะ", type: "text", placeholder: "เช่น Cyberpunk, สตรีทอาร์ต, ภาพยนตร์" },
+                    { id: "motion", label: "การเคลื่อนไหว (สำหรับวิดีโอ)", type: "text", placeholder: "เช่น กล้องแพน, ตัวละครเดิน, เอฟเฟกต์พิเศษ" },
+                    { id: "aspect_ratio", label: "อัตราส่วนภาพ", type: "text", placeholder: "เช่น 16:9, 1:1, 9:16" }
+                ],
+                templates: {
+                    "video-cinematic": {
+                        name: "วิดีโอแนวภาพยนตร์",
+                        prompt: "สร้างวิดีโอแนวภาพยนตร์ สไตล์ '[art_style]' ฉาก '[scene]' มีการเคลื่อนไหว '[motion]'. อัตราส่วนภาพ '[aspect_ratio]'",
+                        defaultValues: { art_style: "Cinematic", aspect_ratio: "16:9" }
+                    },
+                    "image-concept": {
+                        name: "ภาพแนวคิด",
+                        prompt: "สร้างภาพแนวคิด สไตล์ '[art_style]' ฉาก '[scene]'. รายละเอียด: '[motion]'. อัตราส่วนภาพ '[aspect_ratio]'",
+                        inputFields: [
+                            { id: "scene", label: "ฉาก/สถานการณ์", type: "textarea", placeholder: "เช่น เมืองอนาคตยามค่ำคืน, ป่าโบราณ" },
+                            { id: "art_style", label: "สไตล์ศิลปะ", type: "text", placeholder: "เช่น Cyberpunk, สตรีทอาร์ต, ภาพยนตร์" },
+                            { id: "motion", label: "รายละเอียด/องค์ประกอบเพิ่มเติม", type: "text", placeholder: "เช่น แสงไฟนีออน, กลุ่มคนเดินเท้า" },
+                            { id: "aspect_ratio", label: "อัตราส่วนภาพ", type: "text", placeholder: "เช่น 16:9, 1:1, 9:16" }
+                        ],
+                        defaultValues: { art_style: "Concept Art", aspect_ratio: "16:9" }
+                    }
+                }
+            },
+            ideogram: {
+                name: "Ideogram (Image Generation)",
+                description: "AI สำหรับสร้างรูปภาพพร้อมข้อความ",
+                inputFields: [
+                    { id: "visual_desc", label: "ลักษณะภาพ", type: "textarea", placeholder: "เช่น หญิงสาวยิ้มหวาน, โลโก้บริษัท" },
+                    { id: "text_overlay", label: "ข้อความบนภาพ", type: "text", placeholder: "เช่น 'Hello World', 'ชื่อแบรนด์ของคุณ'" },
+                    { id: "font_style", label: "สไตล์ตัวอักษร", type: "text", placeholder: "เช่น ตัวหนา, เขียนด้วยลายมือ, นีออน" },
+                    { id: "color_palette", label: "โทนสี", type: "text", placeholder: "เช่น พาสเทล, มืดหม่น, สดใส" }
+                ],
+                templates: {
+                    "text-logo": {
+                        name: "โลโก้พร้อมข้อความ",
+                        prompt: "สร้างโลโก้สไตล์ '[visual_desc]' โดยมีข้อความ '[text_overlay]' ใช้ฟอนต์สไตล์ '[font_style]' โทนสี '[color_palette]'",
+                        defaultValues: { font_style: "ตัวหนา", color_palette: "สดใส" }
+                    },
+                    "poster-design": {
+                        name: "ออกแบบโปสเตอร์",
+                        prompt: "ออกแบบโปสเตอร์ภาพ '[visual_desc]' พร้อมข้อความ '[text_overlay]' สไตล์ฟอนต์ '[font_style]' และโทนสี '[color_palette]'",
+                        defaultValues: { font_style: "โดดเด่น", color_palette: "ตัดกัน" }
+                    }
+                }
+            },
+            gammas: {
+                name: "Gammas (Text/Story Generation)",
+                description: "AI สำหรับสร้างเนื้อเรื่องหรือโครงสร้างพรีเซนเทชัน",
+                inputFields: [
+                    { id: "topic", label: "หัวข้อ/ประเด็น", type: "text", placeholder: "เช่น ประวัติศาสตร์ AI, การเปลี่ยนแปลงสภาพภูมิอากาศ" },
+                    { id: "purpose", label: "วัตถุประสงค์", type: "text", placeholder: "เช่น เพื่อให้ข้อมูล, เพื่อนำเสนอ, เพื่อสร้างความบันเทิง" },
+                    { id: "audience", label: "กลุ่มเป้าหมาย", type: "text", placeholder: "เช่น นักเรียน, ผู้บริหาร, ประชาชนทั่วไป" },
+                    { id: "content_type", label: "ประเภทเนื้อหา", type: "text", placeholder: "เช่น สไลด์พรีเซนเทชัน, บทสรุป, นิยาย" }
+                ],
+                templates: {
+                    "presentation-outline": {
+                        name: "โครงสร้างสไลด์พรีเซนเทชัน",
+                        prompt: "สร้างโครงสร้างสไลด์พรีเซนเทชันเกี่ยวกับ '[topic]' วัตถุประสงค์ '[purpose]' สำหรับกลุ่มเป้าหมาย '[audience]'",
+                        defaultValues: { content_type: "สไลด์พรีเซนเทชัน" }
+                    },
+                    "story-plot": {
+                        name: "โครงเรื่องนิยาย",
+                        prompt: "สร้างโครงเรื่องนิยายเกี่ยวกับ '[topic]' โดยมีวัตถุประสงค์เพื่อ '[purpose]' สำหรับกลุ่มเป้าหมาย '[audience]' โดยเน้นที่ '[content_type]'",
+                        inputFields: [
+                            { id: "topic", label: "แนวคิดหลักของเรื่อง", type: "textarea", placeholder: "เช่น การเดินทางข้ามเวลาของนักวิทยาศาสตร์" },
+                            { id: "purpose", label: "ธีม/แก่นเรื่อง", type: "text", placeholder: "เช่น มิตรภาพ, การเสียสละ, การแก้แค้น" },
+                            { id: "audience", label: "กลุ่มผู้อ่าน", type: "text", placeholder: "เช่น วัยรุ่น, ผู้ใหญ่, เด็ก" },
+                            { id: "content_type", label: "รายละเอียดที่ต้องการ", type: "text", placeholder: "เช่น จุดหักมุม, ปมขัดแย้งหลัก, บทสรุป" }
+                        ]
+                    }
+                }
+            }
+        };
+
+        // --- JavaScript (ui-manager.js content) ---
+        function hideAllSections() {
+            document.querySelectorAll('main section').forEach(section => {
+                section.classList.add('hidden');
+            });
+        }
+
+        function showSection(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function displayGeneratedPrompt(prompt) {
+            const generatedPromptTextarea = document.getElementById('generated-prompt');
+            if (generatedPromptTextarea) {
+                generatedPromptTextarea.value = prompt;
+            }
+        }
+
+        function loadSavedPromptsList() {
+            const savedPromptsList = document.getElementById('saved-prompts-list');
+            savedPromptsList.innerHTML = '';
+
+            const saved = JSON.parse(localStorage.getItem('savedPrompts') || '[]');
+
+            if (saved.length === 0) {
+                const li = document.createElement('li');
+                li.textContent = 'ยังไม่มี Prompt ที่บันทึกไว้';
+                savedPromptsList.appendChild(li);
+                return;
+            }
+
+            saved.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <strong>AI: ${item.ai}</strong> (${item.timestamp})
+                    <p>${item.prompt.substring(0, 200)}${item.prompt.length > 200 ? '...' : ''}</p>
+                    <button class="copy-saved-btn" data-index="${index}">คัดลอก</button>
+                    <button class="delete-saved-btn" data-index="${index}">ลบ</button>
+                `;
+                savedPromptsList.appendChild(li);
+            });
+
+            savedPromptsList.querySelectorAll('.copy-saved-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const index = event.target.dataset.index;
+                    const promptToCopy = saved[index].prompt;
+                    navigator.clipboard.writeText(promptToCopy).then(() => {
+                        alert('Prompt คัดลอกแล้ว!');
+                    }).catch(err => {
+                        console.error('Failed to copy: ', err);
+                        alert('ไม่สามารถคัดลอกได้ กรุณาลองใหม่');
+                    });
+                });
+            });
+
+            savedPromptsList.querySelectorAll('.delete-saved-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const index = parseInt(event.target.dataset.index);
+                    if (confirm('คุณแน่ใจที่จะลบ Prompt นี้หรือไม่?')) {
+                        let currentSaved = JSON.parse(localStorage.getItem('savedPrompts') || '[]');
+                        currentSaved.splice(index, 1);
+                        localStorage.setItem('savedPrompts', JSON.stringify(currentSaved));
+                        loadSavedPromptsList();
+                        alert('Prompt ถูกลบแล้ว!');
+                    }
+                });
+            });
+        }
+
+        // --- JavaScript (main.js content) ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const navHomeBtn = document.getElementById('nav-home');
+            const navBuilderBtn = document.getElementById('nav-builder');
+            const navSavedBtn = document.getElementById('nav-saved');
+            const aiTypeSelect = document.getElementById('ai-type');
+            const promptTemplatesDiv = document.getElementById('prompt-templates');
+            const promptInputFieldsDiv = document.getElementById('prompt-input-fields');
+            const generatedPromptTextarea = document.getElementById('generated-prompt');
+            const copyPromptBtn = document.getElementById('copy-prompt-btn');
+            const savePromptBtn = document.getElementById('save-prompt-btn');
+
+            function setActiveNavButton(buttonId) {
+                document.querySelectorAll('nav button').forEach(button => {
+                    button.classList.remove('active');
+                });
+                document.getElementById(buttonId).classList.add('active');
+            }
+
+            navHomeBtn.addEventListener('click', () => {
+                hideAllSections();
+                showSection('home-section');
+                setActiveNavButton('nav-home');
+            });
+
+            navBuilderBtn.addEventListener('click', () => {
+                hideAllSections();
+                showSection('builder-section');
+                updateAIInputFields();
+                setActiveNavButton('nav-builder');
+            });
+
+            navSavedBtn.addEventListener('click', () => {
+                hideAllSections();
+                showSection('saved-section');
+                loadSavedPromptsList();
+                setActiveNavButton('nav-saved');
+            });
+
+            aiTypeSelect.addEventListener('change', updateAIInputFields);
+
+            function updateAIInputFields() {
+                const selectedAI = aiTypeSelect.value;
+                const settings = aiSettings[selectedAI];
+
+                promptInputFieldsDiv.innerHTML = '';
+                const templateButtonsContainer = promptTemplatesDiv.querySelector('.template-buttons');
+                if (templateButtonsContainer) {
+                    templateButtonsContainer.innerHTML = '';
+                }
+
+                if (settings) {
+                    settings.inputFields.forEach(field => {
+                        const label = document.createElement('label');
+                        label.setAttribute('for', field.id);
+                        label.textContent = field.label + ':';
+                        promptInputFieldsDiv.appendChild(label);
+
+                        let inputElement;
+                        if (field.type === 'textarea') {
+                            inputElement = document.createElement('textarea');
+                            inputElement.rows = 4;
+                        } else {
+                            inputElement = document.createElement('input');
+                            inputElement.type = field.type;
+                        }
+                        inputElement.id = field.id;
+                        inputElement.placeholder = field.placeholder || '';
+                        promptInputFieldsDiv.appendChild(inputElement);
+                    });
+
+                    const generateButton = document.createElement('button');
+                    generateButton.id = 'generate-prompt-btn';
+                    generateButton.textContent = 'สร้าง Prompt';
+                    promptInputFieldsDiv.appendChild(generateButton);
+                    generateButton.removeEventListener('click', generatePrompt);
+                    generateButton.addEventListener('click', generatePrompt);
+
+                    if (templateButtonsContainer) {
+                        for (const key in settings.templates) {
+                            const template = settings.templates[key];
+                            const button = document.createElement('button');
+                            button.setAttribute('data-template-key', key);
+                            button.textContent = template.name;
+                            button.addEventListener('click', () => applyTemplate(selectedAI, key));
+                            templateButtonsContainer.appendChild(button);
+                        }
+                    }
+                }
+            }
+
+            function applyTemplate(aiKey, templateKey) {
+                const template = aiSettings[aiKey].templates[templateKey];
+                if (!template) return;
+
+                const selectedAIInputs = aiSettings[aiKey].inputFields;
+                selectedAIInputs.forEach(field => {
+                    const input = document.getElementById(field.id);
+                    if (input) input.value = '';
+                });
+
+                const currentInputFields = template.inputFields || aiSettings[aiKey].inputFields;
+                promptInputFieldsDiv.innerHTML = '';
+
+                currentInputFields.forEach(field => {
+                    const label = document.createElement('label');
+                    label.setAttribute('for', field.id);
+                    label.textContent = field.label + ':';
+                    promptInputFieldsDiv.appendChild(label);
+
+                    let inputElement;
+                    if (field.type === 'textarea') {
+                        inputElement = document.createElement('textarea');
+                        inputElement.rows = 4;
+                    } else {
+                        inputElement = document.createElement('input');
+                        inputElement.type = field.type;
+                    }
+                    inputElement.id = field.id;
+                    inputElement.placeholder = field.placeholder || '';
+                    promptInputFieldsDiv.appendChild(inputElement);
+                });
+
+                const generateButton = document.createElement('button');
+                generateButton.id = 'generate-prompt-btn';
+                generateButton.textContent = 'สร้าง Prompt';
+                promptInputFieldsDiv.appendChild(generateButton);
+                generateButton.removeEventListener('click', generatePrompt);
+                generateButton.addEventListener('click', generatePrompt);
+
+                if (template.defaultValues) {
+                    for (const fieldId in template.defaultValues) {
+                        const input = document.getElementById(fieldId);
+                        if (input) {
+                            input.value = template.defaultValues[fieldId];
+                        }
+                    }
+                }
+            }
+
+            function generatePrompt() {
+                const selectedAI = aiTypeSelect.value;
+                const settings = aiSettings[selectedAI];
+                if (!settings) {
+                    displayGeneratedPrompt("Error: ไม่พบการตั้งค่าสำหรับ AI ที่เลือก.");
+                    return;
+                }
+
+                let promptTemplateString = "";
+                const inputValues = {};
+                settings.inputFields.forEach(field => {
+                    const inputElement = document.getElementById(field.id);
+                    if (inputElement) {
+                        inputValues[field.id] = inputElement.value.trim();
+                    }
+                });
+
+                let bestMatchTemplate = null;
+                let maxMatches = -1;
+
+                for (const templateKey in settings.templates) {
+                    const template = settings.templates[templateKey];
+                    const templateFields = template.inputFields || settings.inputFields;
+                    let currentMatches = 0;
+
+                    templateFields.forEach(field => {
+                        if (inputValues[field.id] !== undefined && inputValues[field.id] !== '') {
+                            currentMatches++;
+                        }
+                    });
+
+                    if (currentMatches > maxMatches) {
+                        maxMatches = currentMatches;
+                        bestMatchTemplate = template;
+                    }
+                }
+
+                if (bestMatchTemplate && bestMatchTemplate.prompt) {
+                    promptTemplateString = bestMatchTemplate.prompt;
+                    for (const fieldId in inputValues) {
+                        promptTemplateString = promptTemplateString.replace(new RegExp(`\\[${fieldId}\\]`, 'g'), inputValues[fieldId]);
+                    }
+                    if (bestMatchTemplate.defaultValues) {
+                        for (const fieldId in bestMatchTemplate.defaultValues) {
+                            promptTemplateString = promptTemplateString.replace(new RegExp(`\\[${fieldId}\\]`, 'g'), bestMatchTemplate.defaultValues[fieldId]);
+                        }
+                    }
+                } else {
+                    promptTemplateString = Object.entries(inputValues)
+                                                .filter(([, value]) => value !== '')
+                                                .map(([key, value]) => `${key.replace(/-/g, ' ')}: ${value}`)
+                                                .join(', ');
+                    if (promptTemplateString === '') {
+                        promptTemplateString = "กรุณาใส่ข้อมูลเพื่อสร้าง Prompt";
+                    }
+                }
+
+                promptTemplateString = promptTemplateString.replace(/\[.*?\]/g, '').trim();
+
+                displayGeneratedPrompt(promptTemplateString);
+            }
+
+            copyPromptBtn.addEventListener('click', () => {
+                generatedPromptTextarea.select();
+                document.execCommand('copy');
+                alert('Prompt คัดลอกแล้ว!');
+            });
+
+            savePromptBtn.addEventListener('click', () => {
+                const promptToSave = generatedPromptTextarea.value;
+                if (promptToSave.trim() === '') {
+                    alert('ไม่มี Prompt ให้บันทึก!');
+                    return;
+                }
+                let saved = JSON.parse(localStorage.getItem('savedPrompts') || '[]');
+                saved.push({
+                    prompt: promptToSave,
+                    ai: aiTypeSelect.value,
+                    timestamp: new Date().toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' })
+                });
+                localStorage.setItem('savedPrompts', JSON.stringify(saved));
+                alert('Prompt บันทึกแล้ว!');
+                loadSavedPromptsList();
+            });
+
+            updateAIInputFields();
+            hideAllSections();
+            showSection('home-section');
+            setActiveNavButton('nav-home');
+        });
+    </script>
+</body>
+</html>
